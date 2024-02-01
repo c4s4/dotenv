@@ -1,0 +1,48 @@
+properties:
+  TARGETS:
+    aarch64-unknown-linux-gnu: linux-arm64
+    x86_64-unknown-linux-gnu: linux-amd64
+    aarch64-apple-darwin: darwin-arm64
+    x86_64-apple-darwin: darwin-amd64
+    #x86_64-pc-windows-msvc: windows-amd64
+
+targets:
+
+  build:
+    steps:
+    - $: [cargo, build]
+
+  binaries:
+    steps:
+    - mkdir: 'target/runenv'
+    - for: target
+      in:  =keys(TARGETS)
+      do:
+      - 'name = TARGETS[target]'
+      - print: "Building for target ={name}..."
+      - $: [cross, build, --release, --target, =target]
+      - copy:  'target/={target}/release/runenv'
+        tofile: 'target/runenv/runenv-={name}'
+
+  archive:
+    depends: [binaries]
+    steps:
+    - zip: 'runenv/*'
+      dir: 'target'
+      tofile: 'target/runenv.zip'
+
+  release:
+    depends: [clean, archive]
+    steps:
+    - prompt: 'Release version:'
+      to: version
+    - $: [git, tag, =version, -m, 'Release v{version}']
+    - move: 'target/runenv.zip'
+      tofile: 'target/runenv-={version}.zip'
+    - copy: install
+      todir: 'target/runenv/'
+    - $: [scp, target/runenv/*, elrond:/web/app/dist/runenv/]
+
+  clean:
+    steps:
+    - $: [cargo, clean]
