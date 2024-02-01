@@ -8,6 +8,10 @@ properties:
 
 targets:
 
+  lint:
+    steps:
+    - $: [cargo, check]
+
   build:
     steps:
     - $: [cargo, build]
