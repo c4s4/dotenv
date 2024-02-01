@@ -41,7 +41,7 @@ targets:
       tofile: 'target/runenv-={version}.zip'
     - copy: install
       todir: 'target/runenv/'
-    - $: [scp, target/runenv/*, elrond:/web/app/dist/runenv/]
+    - $: 'scp target/runenv/* elrond:/web/app/dist/runenv/'
 
   clean:
     steps:
