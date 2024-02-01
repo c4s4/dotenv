@@ -14,6 +14,10 @@ targets:
 
   binaries:
     steps:
+    - if: '_OS == "darwin" && _ARCH == "arm64"'
+      then:
+      - setenv: 'CROSS_CONTAINER_OPTS'
+        value:  '--platform linux/amd64'
     - mkdir: 'target/runenv'
     - for: target
       in:  =keys(TARGETS)
