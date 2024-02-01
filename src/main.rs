@@ -9,7 +9,7 @@ use std::process::Command;
 struct Cli {
     /// The dotenv file to load
     #[arg(short, long, default_value = ".env")]
-    env: std::path::PathBuf,
+    env: Vec<String>,
     /// Clear environment before loading env file
     #[arg(short, long, default_value_t = false)]
     clear: bool,
@@ -30,9 +30,11 @@ fn main() {
         }
     }
     // load environment from dotenv file
-    if let Err(err) = dotenv::from_filename(&args.env) {
-        eprintln!("ERROR loading dotenv file '{}': {err}", &args.env.display());
-        process::exit(1);
+    for path in &args.env {
+        if let Err(err) = dotenv::from_filename(&path) {
+            eprintln!("ERROR loading dotenv file '{}': {err}", &path);
+            process::exit(1);
+        }
     }
     // check command is not empty
     if args.cmd.is_empty() {
