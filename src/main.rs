@@ -1,6 +1,7 @@
 use clap::Parser;
 use dotenv;
 use std::env;
+use std::process;
 use std::process::Command;
 
 /// Run command in environment loaded from dotenv file
@@ -29,23 +30,30 @@ fn main() {
         }
     }
     // load environment from dotenv file
-    dotenv::from_filename(&args.env).expect("error loading dotenv file");
+    if let Err(err) = dotenv::from_filename(&args.env) {
+        eprintln!("ERROR loading dotenv file '{}': {err}", &args.env.display());
+        process::exit(1);
+    }
     // check command is not empty
     if args.cmd.is_empty() {
         return;
     }
     if args.shell {
         // run command
-        Command::new("sh")
+        if let Err(err) = Command::new("sh")
             .arg("-c")
             .arg(&args.cmd.join(" "))
-            .status()
-            .expect("failed to execute process");
+            .status() {
+                eprintln!("ERROR running command: {err}");
+                process::exit(1);
+            };
     } else {
         // run command
-        Command::new(&args.cmd[0])
+        if let Err(err) = Command::new(&args.cmd[0])
             .args(&args.cmd[1..])
-            .status()
-            .expect("failed to execute process");
+            .status() {
+                eprintln!("ERROR running command: {err}");
+                process::exit(1);
+            };
     }
 }
