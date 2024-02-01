@@ -13,12 +13,10 @@ targets:
 
   env:
     steps:
-    - setenv: 'RUNENV_VERSION'
+    - setenv: VERSION
       value:  =VERSION
-    - if: '_OS == "darwin" && _ARCH == "arm64"'
-      then:
-      - setenv: 'CROSS_CONTAINER_OPTS'
-        value:  '--platform linux/amd64'
+    - setenv: CROSS_CONTAINER_OPTS
+      value:  '--platform linux/amd64'
 
   lint:
     depends: env

@@ -4,7 +4,7 @@ use std::env;
 use std::process;
 use std::process::Command;
 
-const VERSION: &str = env!("RUNENV_VERSION");
+const VERSION: &str = env!("VERSION");
 
 /// Run command in environment loaded from dotenv file
 #[derive(Parser)]
