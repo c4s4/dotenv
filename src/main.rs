@@ -12,6 +12,9 @@ struct Cli {
     /// Clear environment before loading env file
     #[arg(short, long, default_value_t = false)]
     clear: bool,
+    /// Run command in a shell
+    #[arg(short, long, default_value_t = false)]
+    shell: bool,
     /// The command to run
     cmd: Vec<String>,
 }
@@ -21,7 +24,7 @@ fn main() {
     let args = Cli::parse();
     // clear environment
     if args.clear {
-        for(key, _) in env::vars().into_iter() {
+        for (key, _) in env::vars().into_iter() {
             env::remove_var(key)
         }
     }
@@ -31,12 +34,18 @@ fn main() {
     if args.cmd.is_empty() {
         return;
     }
-    // get command and arguments arguments
-    let command = &args.cmd[0];
-    let arguments = &args.cmd[1..];
-    // run command
-    Command::new(command)
-        .args(arguments)
-        .status()
-        .expect("failed to execute process");
+    if args.shell {
+        // run command
+        Command::new("sh")
+            .arg("-c")
+            .arg(&args.cmd.join(" "))
+            .status()
+            .expect("failed to execute process");
+    } else {
+        // run command
+        Command::new(&args.cmd[0])
+            .args(&args.cmd[1..])
+            .status()
+            .expect("failed to execute process");
+    }
 }
