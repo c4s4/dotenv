@@ -42,20 +42,32 @@ fn main() {
     }
     if args.shell {
         // run command
-        if let Err(err) = Command::new("sh")
-            .arg("-c")
-            .arg(&args.cmd.join(" "))
-            .status() {
+        if env::consts::OS == "windows" {
+            // on windows
+            if let Err(err) = Command::new("cmd")
+                .arg("/c")
+                .arg(&args.cmd.join(" "))
+                .status()
+            {
                 eprintln!("ERROR running command: {err}");
                 process::exit(1);
             };
+        } else {
+            // on unix
+            if let Err(err) = Command::new("sh")
+                .arg("-c")
+                .arg(&args.cmd.join(" "))
+                .status()
+            {
+                eprintln!("ERROR running command: {err}");
+                process::exit(1);
+            };
+        }
     } else {
         // run command
-        if let Err(err) = Command::new(&args.cmd[0])
-            .args(&args.cmd[1..])
-            .status() {
-                eprintln!("ERROR running command: {err}");
-                process::exit(1);
-            };
+        if let Err(err) = Command::new(&args.cmd[0]).args(&args.cmd[1..]).status() {
+            eprintln!("ERROR running command: {err}");
+            process::exit(1);
+        };
     }
 }
