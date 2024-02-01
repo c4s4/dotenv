@@ -4,9 +4,14 @@ use std::env;
 use std::process;
 use std::process::Command;
 
+const VERSION: &str = env!("RUNENV_VERSION");
+
 /// Run command in environment loaded from dotenv file
 #[derive(Parser)]
 struct Cli {
+    /// The runenv version
+    #[arg(short, long)]
+    version: bool,
     /// The dotenv file to load
     #[arg(short, long, default_value = ".env")]
     env: Vec<String>,
@@ -23,6 +28,11 @@ struct Cli {
 fn main() {
     // parse command line arguments
     let args = Cli::parse();
+    // print version and exit
+    if args.version {
+        println!("{}", VERSION);
+        return
+    }
     // clear environment
     if args.clear {
         for (key, _) in env::vars().into_iter() {

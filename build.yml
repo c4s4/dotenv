@@ -1,6 +1,7 @@
 default: lint
 
 properties:
+  VERSION: '0.1.1'
   TARGETS:
     aarch64-unknown-linux-gnu: linux-arm64
     x86_64-unknown-linux-gnu: linux-amd64
@@ -10,20 +11,28 @@ properties:
 
 targets:
 
-  lint:
+  env:
     steps:
-    - $: [cargo, check]
-
-  build:
-    steps:
-    - $: [cargo, build]
-
-  binaries:
-    steps:
+    - setenv: 'RUNENV_VERSION'
+      value:  =VERSION
     - if: '_OS == "darwin" && _ARCH == "arm64"'
       then:
       - setenv: 'CROSS_CONTAINER_OPTS'
         value:  '--platform linux/amd64'
+
+  lint:
+    depends: env
+    steps:
+    - $: [cargo, check]
+
+  build:
+    depends: env
+    steps:
+    - $: [cargo, build]
+
+  binaries:
+    depends: env
+    steps:
     - mkdir: 'target/runenv'
     - for: target
       in:  =keys(TARGETS)
@@ -44,14 +53,13 @@ targets:
   release:
     depends: [clean, archive]
     steps:
-    - prompt: 'Release version:'
-      to: version
-    - $: [git, tag, =version, -m, 'Release v{version}']
+    - $: [git, tag, =VERSION, -m, 'Release v={VERSION}']
     - move: 'target/runenv.zip'
-      tofile: 'target/runenv-={version}.zip'
+      tofile: 'target/runenv-={VERSION}.zip'
     - copy: install
       todir: 'target/runenv/'
     - $: 'scp target/runenv/* elrond:/web/app/dist/runenv/'
+    - $: [git, push, --tags]
 
   clean:
     steps:
