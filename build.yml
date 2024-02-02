@@ -30,6 +30,11 @@ targets:
     steps:
     - $: [cargo, build]
 
+  install:
+    depends: env
+    steps:
+    - $: [cargo, install, --path, .]
+
   binaries:
     depends: env
     steps:
