@@ -1,3 +1,6 @@
+# Build runenv project
+# Using tool toml installed with `cargo install toml-cli`
+
 default: lint
 
 properties:
@@ -50,9 +53,14 @@ targets:
   release:
     depends: [clean, archive]
     steps:
+    - $: [toml, get, Cargo.toml, package.version, --raw]
+      1=: version
+      1x: true
+    - $: [git, tag, =version]
     - copy: install
       todir: 'target/runenv/'
     - $: 'scp target/runenv/* elrond:/web/app/dist/runenv/'
+    - $: [git, push, --tags]
 
   clean:
     steps:
