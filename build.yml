@@ -9,7 +9,7 @@ properties:
     x86_64-unknown-linux-gnu: linux-amd64
     aarch64-apple-darwin: darwin-arm64
     x86_64-apple-darwin: darwin-amd64
-    #x86_64-pc-windows-msvc: windows-amd64
+    x86_64-pc-windows-gnu: windows-amd64
 
 targets:
 
@@ -42,6 +42,8 @@ targets:
       - $: [cross, build, --release, --target, =target]
       - copy:  'target/={target}/release/runenv'
         tofile: 'target/runenv/runenv-={name}'
+      - copy:  'target/={target}/release/runenv.exe'
+        tofile: 'target/runenv/runenv-={name}.exe'
 
   archive:
     depends: [binaries]
@@ -57,6 +59,8 @@ targets:
       1=: version
       1x: true
     - $: [git, tag, =version]
+    - move: 'target/runenv.zip'
+      tofile: 'target/runenv-={version}.zip'
     - copy: install
       todir: 'target/runenv/'
     - $: 'scp target/runenv/* elrond:/web/app/dist/runenv/'
