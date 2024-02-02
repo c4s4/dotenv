@@ -4,7 +4,7 @@ use std::env;
 use std::process;
 use std::process::Command;
 
-const VERSION: &str = env!("VERSION");
+const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// Run command in environment loaded from dotenv file
 #[derive(Parser)]
