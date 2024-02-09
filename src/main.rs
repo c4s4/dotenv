@@ -9,7 +9,7 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 /// Run command in environment loaded from dotenv file
 #[derive(Parser)]
 struct Cli {
-    /// The runenv version
+    /// The dotenv version
     #[arg(short, long)]
     version: bool,
     /// The dotenv file to load
@@ -31,7 +31,7 @@ fn main() {
     // print version and exit
     if args.version {
         println!("{}", VERSION);
-        return
+        return;
     }
     // clear environment
     if args.clear {
