@@ -1,5 +1,4 @@
 use clap::Parser;
-use dotenv;
 use std::env;
 use std::process;
 use std::process::Command;
@@ -41,43 +40,63 @@ fn main() {
     }
     // load environment from dotenv file
     for path in &args.env {
-        if let Err(err) = dotenv::from_filename(&path) {
-            eprintln!("ERROR loading dotenv file '{}': {err}", &path);
-            process::exit(1);
-        }
+        load_dotenv_file(path);
     }
     // check command is not empty
     if args.cmd.is_empty() {
         return;
     }
-    if args.shell {
+    // run command
+    run_command(args.cmd, args.shell);
+}
+
+/// Load environment from dotenv file
+fn load_dotenv_file(path: &str) {
+    // load file content
+    let content = match std::fs::read_to_string(path) {
+        Ok(content) => content,
+        Err(err) => {
+            error(&format!("loading dotenv file: {err}"));
+            return;
+        }
+    };
+    // parse file content
+    for line in content.lines() {
+        let line = line.trim();
+        if line.is_empty() || line.starts_with('#') {
+            continue;
+        }
+        let key = line.splitn(2, '=').next().unwrap().trim();
+        let value = line.splitn(2, '=').nth(1).unwrap().trim();
+        env::set_var(key, value);
+    }
+}
+
+/// Run command
+fn run_command(cmd: Vec<String>, shell: bool) {
+    if shell {
         // run command
         if env::consts::OS == "windows" {
             // on windows
-            if let Err(err) = Command::new("cmd")
-                .arg("/c")
-                .arg(&args.cmd.join(" "))
-                .status()
-            {
-                eprintln!("ERROR running command: {err}");
-                process::exit(1);
+            if let Err(err) = Command::new("cmd").arg("/c").arg(&cmd.join(" ")).status() {
+                error(&format!("running command: {err}"));
             };
         } else {
             // on unix
-            if let Err(err) = Command::new("sh")
-                .arg("-c")
-                .arg(&args.cmd.join(" "))
-                .status()
-            {
-                eprintln!("ERROR running command: {err}");
-                process::exit(1);
+            if let Err(err) = Command::new("sh").arg("-c").arg(&cmd.join(" ")).status() {
+                error(&format!("running command: {err}"));
             };
         }
     } else {
         // run command
-        if let Err(err) = Command::new(&args.cmd[0]).args(&args.cmd[1..]).status() {
-            eprintln!("ERROR running command: {err}");
-            process::exit(1);
+        if let Err(err) = Command::new(&cmd[0]).args(&cmd[1..]).status() {
+            error(&format!("running command: {err}"));
         };
     }
+}
+
+/// Print error message and exit
+fn error(msg: &str) {
+    eprintln!("ERROR {msg}");
+    process::exit(1);
 }
