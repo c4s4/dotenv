@@ -47,7 +47,7 @@ fn main() {
         return;
     }
     // run command
-    run_command(args.cmd, args.shell);
+    process::exit(run_command(args.cmd, args.shell));
 }
 
 /// Load environment from dotenv file
@@ -73,25 +73,31 @@ fn load_dotenv_file(path: &str) {
 }
 
 /// Run command
-fn run_command(cmd: Vec<String>, shell: bool) {
+fn run_command(cmd: Vec<String>, shell: bool) -> i32 {
     if shell {
         // run command
         if env::consts::OS == "windows" {
             // on windows
-            if let Err(err) = Command::new("cmd").arg("/c").arg(&cmd.join(" ")).status() {
-                error(&format!("running command: {err}"));
+            let result = Command::new("cmd").arg("/c").arg(&cmd.join(" ")).status();
+            if result.as_ref().is_err()  {
+                error(&format!("running command: {}", result.as_ref().err().unwrap()));
             };
+            return result.unwrap().code().unwrap();
         } else {
             // on unix
-            if let Err(err) = Command::new("sh").arg("-c").arg(&cmd.join(" ")).status() {
-                error(&format!("running command: {err}"));
+            let result = Command::new("sh").arg("-c").arg(&cmd.join(" ")).status();
+            if result.as_ref().is_err()  {
+                error(&format!("running command: {}", result.as_ref().err().unwrap()));
             };
+            return result.unwrap().code().unwrap();
         }
     } else {
         // run command
-        if let Err(err) = Command::new(&cmd[0]).args(&cmd[1..]).status() {
-            error(&format!("running command: {err}"));
+        let result = Command::new(&cmd[0]).args(&cmd[1..]).status();
+        if result.as_ref().is_err()  {
+            error(&format!("running command: {}", result.as_ref().err().unwrap()));
         };
+        return result.unwrap().code().unwrap();
     }
 }
 
