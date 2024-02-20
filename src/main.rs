@@ -3,14 +3,10 @@ use std::env;
 use std::process;
 use std::process::Command;
 
-const VERSION: &str = env!("CARGO_PKG_VERSION");
-
 /// Run command in environment loaded from dotenv file
 #[derive(Parser)]
+#[command(version)]
 struct Cli {
-    /// The dotenv version
-    #[arg(short, long)]
-    version: bool,
     /// The dotenv file to load
     #[arg(short, long, default_value = ".env")]
     env: Vec<String>,
@@ -27,11 +23,6 @@ struct Cli {
 fn main() {
     // parse command line arguments
     let args = Cli::parse();
-    // print version and exit
-    if args.version {
-        println!("{}", VERSION);
-        return;
-    }
     // clear environment
     if args.clear {
         for (key, _) in env::vars().into_iter() {
@@ -79,23 +70,32 @@ fn run_command(cmd: Vec<String>, shell: bool) -> i32 {
         if env::consts::OS == "windows" {
             // on windows
             let result = Command::new("cmd").arg("/c").arg(&cmd.join(" ")).status();
-            if result.as_ref().is_err()  {
-                error(&format!("running command: {}", result.as_ref().err().unwrap()));
+            if result.as_ref().is_err() {
+                error(&format!(
+                    "running command: {}",
+                    result.as_ref().err().unwrap()
+                ));
             };
             return result.unwrap().code().unwrap();
         } else {
             // on unix
             let result = Command::new("sh").arg("-c").arg(&cmd.join(" ")).status();
-            if result.as_ref().is_err()  {
-                error(&format!("running command: {}", result.as_ref().err().unwrap()));
+            if result.as_ref().is_err() {
+                error(&format!(
+                    "running command: {}",
+                    result.as_ref().err().unwrap()
+                ));
             };
             return result.unwrap().code().unwrap();
         }
     } else {
         // run command
         let result = Command::new(&cmd[0]).args(&cmd[1..]).status();
-        if result.as_ref().is_err()  {
-            error(&format!("running command: {}", result.as_ref().err().unwrap()));
+        if result.as_ref().is_err() {
+            error(&format!(
+                "running command: {}",
+                result.as_ref().err().unwrap()
+            ));
         };
         return result.unwrap().code().unwrap();
     }
