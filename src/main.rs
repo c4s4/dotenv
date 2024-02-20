@@ -66,7 +66,7 @@ fn load_dotenv_file(path: &str) {
 /// Run command
 fn run_command(cmd: Vec<String>, shell: bool) -> i32 {
     if shell {
-        // run command
+        // run command in shell
         if env::consts::OS == "windows" {
             // on windows
             match Command::new("cmd").arg("/c").arg(&cmd.join(" ")).status() {
@@ -87,7 +87,7 @@ fn run_command(cmd: Vec<String>, shell: bool) -> i32 {
             }
         }
     } else {
-        // run command
+        // run command without shell
         match Command::new(&cmd[0]).args(&cmd[1..]).status() {
             Ok(status) => return status.code().unwrap(),
             Err(err) => {
