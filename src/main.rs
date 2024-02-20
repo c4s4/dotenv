@@ -47,8 +47,8 @@ fn load_dotenv_file(path: &str) {
     let content = match std::fs::read_to_string(path) {
         Ok(content) => content,
         Err(err) => {
-            error(&format!("loading dotenv file: {err}"));
-            return;
+            eprintln!("ERROR loading dotenv file: {err}");
+            process::exit(1);
         }
     };
     // parse file content
@@ -69,40 +69,31 @@ fn run_command(cmd: Vec<String>, shell: bool) -> i32 {
         // run command
         if env::consts::OS == "windows" {
             // on windows
-            let result = Command::new("cmd").arg("/c").arg(&cmd.join(" ")).status();
-            if result.as_ref().is_err() {
-                error(&format!(
-                    "running command: {}",
-                    result.as_ref().err().unwrap()
-                ));
-            };
-            return result.unwrap().code().unwrap();
+            match Command::new("cmd").arg("/c").arg(&cmd.join(" ")).status() {
+                Ok(status) => return status.code().unwrap(),
+                Err(err) => {
+                    eprintln!("ERROR running command: {err}");
+                    process::exit(1);
+                }
+            }
         } else {
             // on unix
-            let result = Command::new("sh").arg("-c").arg(&cmd.join(" ")).status();
-            if result.as_ref().is_err() {
-                error(&format!(
-                    "running command: {}",
-                    result.as_ref().err().unwrap()
-                ));
-            };
-            return result.unwrap().code().unwrap();
+            match Command::new("sh").arg("-c").arg(&cmd.join(" ")).status() {
+                Ok(status) => return status.code().unwrap(),
+                Err(err) => {
+                    eprintln!("ERROR running command: {err}");
+                    process::exit(1);
+                }
+            }
         }
     } else {
         // run command
-        let result = Command::new(&cmd[0]).args(&cmd[1..]).status();
-        if result.as_ref().is_err() {
-            error(&format!(
-                "running command: {}",
-                result.as_ref().err().unwrap()
-            ));
-        };
-        return result.unwrap().code().unwrap();
+        match Command::new(&cmd[0]).args(&cmd[1..]).status() {
+            Ok(status) => return status.code().unwrap(),
+            Err(err) => {
+                eprintln!("ERROR running command: {err}");
+                process::exit(1);
+            }
+        }
     }
-}
-
-/// Print error message and exit
-fn error(msg: &str) {
-    eprintln!("ERROR {msg}");
-    process::exit(1);
 }
