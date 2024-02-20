@@ -1,6 +1,7 @@
 use clap::Parser;
 use std::env;
 use std::process;
+use std::process::Command;
 
 /// Run command in environment loaded from dotenv file
 #[derive(Parser)]
@@ -68,11 +69,7 @@ fn run_command(cmd: Vec<String>, shell: bool) -> i32 {
         // run command in shell
         if env::consts::OS == "windows" {
             // on windows
-            match process::Command::new("cmd")
-                .arg("/c")
-                .arg(&cmd.join(" "))
-                .status()
-            {
+            match Command::new("cmd").arg("/c").arg(&cmd.join(" ")).status() {
                 Ok(status) => return status.code().unwrap(),
                 Err(err) => {
                     eprintln!("ERROR running command: {err}");
@@ -81,11 +78,7 @@ fn run_command(cmd: Vec<String>, shell: bool) -> i32 {
             }
         } else {
             // on unix
-            match process::Command::new("sh")
-                .arg("-c")
-                .arg(&cmd.join(" "))
-                .status()
-            {
+            match Command::new("sh").arg("-c").arg(&cmd.join(" ")).status() {
                 Ok(status) => return status.code().unwrap(),
                 Err(err) => {
                     eprintln!("ERROR running command: {err}");
@@ -95,7 +88,7 @@ fn run_command(cmd: Vec<String>, shell: bool) -> i32 {
         }
     } else {
         // run command without shell
-        match process::Command::new(&cmd[0]).args(&cmd[1..]).status() {
+        match Command::new(&cmd[0]).args(&cmd[1..]).status() {
             Ok(status) => return status.code().unwrap(),
             Err(err) => {
                 eprintln!("ERROR running command: {err}");
