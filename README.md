@@ -29,7 +29,7 @@ Otherwise, you can download latest binary archive at <https://github.com/c4s4/do
 You can get help in terminal with command `dotenv --help`:
 
 ```
-$ dotenv --help
+$ dotenv -h
 Run command in environment loaded from dotenv file
 
 Usage: dotenv [OPTIONS] [CMD]...
@@ -38,10 +38,11 @@ Arguments:
   [CMD]...  The command to run
 
 Options:
-  -e, --env <ENV>  The dotenv file to load [default: .env]
-  -c, --clear      Clear environment before loading env file
-  -s, --shell      Run command in a shell
-  -h, --help       Print help
+  -e, --env <ENV>      The dotenv file to load [default: .env]
+  -c, --clear          Clear environment before loading env file
+  -s, --shell <SHELL>  Shell to run command in (default: sh on Unix or cmd on Windows)
+  -h, --help           Print help
+  -V, --version        Print version
 ```
 
 To run command *foo* with its arguments *args...* in the environment defined in *.env* file in current directory, type:
@@ -81,7 +82,7 @@ FOO=SPAM
 BAR=EGGS
 ```
 
-## Shell
+## Note
 
 Let's say you have following *.env* file:
 
@@ -100,20 +101,15 @@ But this is not what happens:
 
 ```bash
 $ dotenv echo $FOO
-
 ```
 
 Because `$FOO` will be evaluated by the shell before running *dotenv* and replaced with its value on command line. To have expected behavior, you must run:
 
 ```bash
-$ dotenv --shell 'echo $FOO'
+$ dotenv echo '$FOO'
 BAR
 ```
 
-In this case, command `echo $FOO` will not be evaluated until it runs in a shell. This shell will run in environment defined with dotenv file passed on command line and will print expected value on the console.
-
-Note that you could try to obtain expected result with command `dotenv 'echo $FOO'`, but this won't work because *dotenv* will try to run command `echo $FOO` which doesn't exist.
-
-On Unix, *dotenv* will run command in a shell with `sh -c command` and `cmd /c command` on Windows.
+In this case, `'$FOO'` will not be evaluated until it runs in dotenv.
 
 *Enjoy!*
