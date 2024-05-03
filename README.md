@@ -29,7 +29,7 @@ Otherwise, you can download latest binary archive at <https://github.com/c4s4/do
 You can get help in terminal with command `dotenv --help`:
 
 ```
-$ target/debug/dotenv --help
+$ dotenv --help
 Run command in environment loaded from dotenv file
 
 Usage: dotenv [OPTIONS] [CMD]...
